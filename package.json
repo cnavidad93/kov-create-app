@@ -1,11 +1,12 @@
 {
   "name": "kov-create-app",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "CLI tool to create base structure for kov projects",
   "main": "index.js",
   "type": "module",
   "bin": {
-    "kov-create-app": "./index.js"
+    "kov-create-app": "./index.js",
+    "kca": "./index.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

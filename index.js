@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import * as fs from "node:fs";
+import path from "path";
 import figlet from "figlet";
 import gradient from "gradient-string";
 import inquirer from "inquirer";
@@ -28,20 +29,37 @@ const packages = {
   devDependencies: {},
 };
 
-let projectName, frontendStack, extraFeatures, jsFileExt, reactFileExt;
+let projectName, frontendStack, extraFeatures, jsFileExt, reactFileExt, dirname;
 
 // HELPERS
 const sleep = async (ms) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
+const setDirname = () => {
+  try {
+    let { pathname } = new URL(import.meta.url);
+    if (pathname.startsWith("/")) pathname = pathname.substring(1);
+    const root = path.resolve(pathname, "../");
+    fs.accessSync(root, fs.constants.R_OK);
+    dirname = root;
+  } catch (error) {
+    console.log(
+      `Error: ${chalk.red(
+        "Error: lib files not found. Try to reinstall the library."
+      )}`
+    );
+    process.exit(1);
+  }
+};
+
 const copyFile = (source, destination) => {
-  return fs.copyFileSync(source, `./${projectName}${destination}`);
+  return fs.copyFileSync(dirname + source, `./${projectName}${destination}`);
 };
 
 const copyFolder = (source, destination) => {
   fs.mkdirSync(`./${projectName}${destination}`);
-  return fs.cpSync(source, `./${projectName}${destination}`, {
+  return fs.cpSync(dirname + source, `./${projectName}${destination}`, {
     recursive: true,
   });
 };
@@ -142,18 +160,18 @@ async function promptInstallDependencies() {
 // BUILDERS
 function baseProjectSetup() {
   // copy default Home component
-  copyFile("./components/Home.jsx", `/src/components/Home.${reactFileExt}`);
+  copyFile("/components/Home.jsx", `/src/components/Home.${reactFileExt}`);
 
   // copy default styles
-  copyFile("./styles/index.css", "/src/index.css");
-  copyFile("./styles/Home.scss", "/src/components/Home.scss");
+  copyFile("/styles/index.css", "/src/index.css");
+  copyFile("/styles/Home.scss", "/src/components/Home.scss");
 
   // copy Eslint, Prittier, .gitignore and vite config files
   console.log(chalk.green(`Adding eslint and prettier rules..`));
-  copyFile("./configs/.eslintrc.json", "/.eslintrc.json");
-  copyFile("./configs/.gitignore", "/.gitignore");
-  copyFile("./configs/.prettierrc", "/.prettierrc");
-  copyFile("./configs/vite.config.js", `/vite.config.${jsFileExt}`);
+  copyFile("/configs/.eslintrc.json", "/.eslintrc.json");
+  copyFile("/configs/.gitignore", "/.gitignore");
+  copyFile("/configs/.prettierrc", "/.prettierrc");
+  copyFile("/configs/vite.config.js", `/vite.config.${jsFileExt}`);
 }
 
 function reduxSetup() {
@@ -162,13 +180,13 @@ function reduxSetup() {
   addPackages(REDUX_PACKAGES);
 
   // copy redux config and example
-  copyFolder(`./redux/${jsFileExt}`, "/src/store");
+  copyFolder(`/redux/${jsFileExt}`, "/src/store");
 
   // copy redux based Home component
-  copyFile("./components/HomeRedux.jsx", `/src/components/${reactFileExt}`);
+  copyFile("/components/HomeRedux.jsx", `/src/components/${reactFileExt}`);
 
   // add redux store provider to root component
-  copyFile("./components/indexRedux.jsx", `/src/index.${reactFileExt}`);
+  copyFile("/components/indexRedux.jsx", `/src/index.${reactFileExt}`);
 }
 
 function createPackageJson() {
@@ -206,7 +224,7 @@ async function createScaffold() {
     addPackages(DEFAULT_PACKAGES);
 
     // copy template
-    copyFolder("./templates/react-swc", "/");
+    copyFolder("/templates/react-swc", "/");
     baseProjectSetup();
   } else if (frontendStack === FRONTEND_STACK.REACT_TYPESCRIPT) {
     // add default and typescript packages
@@ -215,7 +233,7 @@ async function createScaffold() {
     addPackages(TYPESCRIPT_PACKAGES);
 
     // copy template
-    copyFolder("./templates/react-swc-ts", "/");
+    copyFolder("/templates/react-swc-ts", "/");
     baseProjectSetup();
   } else {
     console.log(chalk.red("Error: Frontend Stack not valid."));
@@ -234,6 +252,8 @@ async function createScaffold() {
   createPackageJson();
 }
 
+setDirname();
+
 try {
   await showTitle("KOV CREATE APP");
 
@@ -242,10 +262,14 @@ try {
   await promptExtraFeatures();
 
   await createScaffold();
-
-  await promptInstallDependencies();
 } catch (error) {
   console.log(`Error: ${chalk.red(error.message)}`);
   cmd(`rm -rf ./${projectName}`);
+  process.exit(1);
+}
+
+try {
+  await promptInstallDependencies();
+} catch (error) {
   process.exit(1);
 }
