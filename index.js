@@ -6,6 +6,7 @@ import gradient from "gradient-string";
 import inquirer from "inquirer";
 import { execSync as cmd } from "child_process";
 import chalk from "chalk";
+import { Command, Option } from "commander";
 import {
   DEFAULT_PACKAGES,
   KOV_SHARED_PACKAGES,
@@ -82,6 +83,37 @@ const setStack = (type = "js") => {
   reactFileExt = type === "js" ? "jsx" : "tsx";
 };
 
+const argumentsChecker = () => {
+  const program = new Command();
+  program
+    .argument("<projectName>", "name of your project")
+    .addOption(
+      new Option("-t, --template <stack>", "template type").choices([
+        "react",
+        "typescript",
+      ])
+    )
+    .option("-r, --redux", "add redux and redux saga")
+    .option("-k, --kov-shared-components", "add kov-shared-components lib")
+    .action((name) => {
+      if(name) {
+        const options = program.opts();
+        
+        projectName = name;
+        frontendStack = options?.template === 'react' ? FRONTEND_STACK.REACT : FRONTEND_STACK.REACT_TYPESCRIPT;
+        extraFeatures = [];
+
+        if(options.redux) extraFeatures.push(FEATURES.REDUX);
+        if(options.kovSharedComponents) extraFeatures.push(FEATURES.KOV_SHARED);
+
+        console.log({name, ...options});
+      }
+
+    });
+
+  program.parse(process.argv);
+};
+
 // CLI FORM
 async function showTitle(title) {
   console.clear();
@@ -91,6 +123,7 @@ async function showTitle(title) {
 }
 
 async function promptProjectName() {
+  if(projectName) return;
   const answer = await inquirer.prompt({
     name: "project_name",
     type: "input",
@@ -104,6 +137,7 @@ async function promptProjectName() {
 }
 
 async function promptFrontendStack() {
+  if(frontendStack) return;
   const answer = await inquirer.prompt({
     name: "frontend_stack",
     type: "list",
@@ -115,6 +149,7 @@ async function promptFrontendStack() {
 }
 
 async function promptExtraFeatures() {
+  if(extraFeatures) return;
   const answer = await inquirer.prompt({
     name: "extra_features",
     type: "checkbox",
@@ -256,7 +291,8 @@ setDirname();
 
 try {
   await showTitle("KOV CREATE APP");
-
+  
+  argumentsChecker();
   await promptProjectName();
   await promptFrontendStack();
   await promptExtraFeatures();
