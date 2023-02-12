@@ -1,6 +1,6 @@
 {
   "name": "kov-create-app",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "CLI tool to create base structure for kov projects",
   "main": "index.js",
   "type": "module",
@@ -10,6 +10,10 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cnavidad93/kov-create-app.git"
   },
   "keywords": [],
   "author": "",
