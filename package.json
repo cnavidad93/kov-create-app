@@ -1,7 +1,7 @@
 {
   "name": "kov-create-app",
-  "version": "1.0.3",
-  "description": "CLI tool to create base structure for kov projects",
+  "version": "1.0.4",
+  "description": "CLI tool to create a base setup for kov projects",
   "main": "index.js",
   "type": "module",
   "bin": {

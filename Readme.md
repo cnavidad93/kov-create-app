@@ -1,23 +1,24 @@
-
 # Kov Create App
 
 [![Version](https://img.shields.io/github/package-json/v/cnavidad93/kov-create-app)](https://img.shields.io/github/package-json/v/cnavidad93/kov-create-app)
 
-CLI tool to create base structure for kov projects using Vite and SWC.
-The project created comes with Eslint and Prettier configuration as well as the folder structure according to the standards of KOV.
+CLI tool to create a base setup for kov projects using Vite and SWC.
+The project created comes with an opinionated version of Eslint and Prettier configuration as well as the folders structure according to the standards of KOV.
 
 ## Frontend Stack
 
 You will be prompt to use any of this options for your project:
- - React
- - React + Typescript
+
+- React
+- React + Typescript
 
 ## Features
 
 You will be prompt to add any of this features to your project:
- - Redux with Redux Saga
- - Kov-shared-components library
- - *Tests with Jest (Coming Soon..)*
+
+- Redux with Redux Saga
+- Kov-shared-components library
+- _Tests with Jest (Coming Soon..)_
 
 ## Usage
 
