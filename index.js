@@ -4,7 +4,7 @@ import path from "path";
 import figlet from "figlet";
 import gradient from "gradient-string";
 import inquirer from "inquirer";
-import { execSync as cmd } from "child_process";
+import { execSync } from "child_process";
 import chalk from "chalk";
 import { Command, Option } from "commander";
 import {
@@ -84,6 +84,8 @@ const setStack = (type = "js") => {
 };
 
 const argumentsChecker = () => {
+  if (process.argv.length <= 2) return;
+
   const program = new Command();
   program
     .argument("<projectName>", "name of your project")
@@ -96,19 +98,22 @@ const argumentsChecker = () => {
     .option("-r, --redux", "add redux and redux saga")
     .option("-k, --kov-shared-components", "add kov-shared-components lib")
     .action((name) => {
-      if(name) {
+      if (name) {
         const options = program.opts();
-        
+
         projectName = name;
-        frontendStack = options?.template === 'react' ? FRONTEND_STACK.REACT : FRONTEND_STACK.REACT_TYPESCRIPT;
+        frontendStack =
+          options?.template === "react"
+            ? FRONTEND_STACK.REACT
+            : FRONTEND_STACK.REACT_TYPESCRIPT;
         extraFeatures = [];
 
-        if(options.redux) extraFeatures.push(FEATURES.REDUX);
-        if(options.kovSharedComponents) extraFeatures.push(FEATURES.KOV_SHARED);
+        if (options.redux) extraFeatures.push(FEATURES.REDUX);
+        if (options.kovSharedComponents)
+          extraFeatures.push(FEATURES.KOV_SHARED);
 
-        console.log({name, ...options});
+        console.log({ name, ...options });
       }
-
     });
 
   program.parse(process.argv);
@@ -123,7 +128,7 @@ async function showTitle(title) {
 }
 
 async function promptProjectName() {
-  if(projectName) return;
+  if (projectName) return;
   const answer = await inquirer.prompt({
     name: "project_name",
     type: "input",
@@ -137,7 +142,7 @@ async function promptProjectName() {
 }
 
 async function promptFrontendStack() {
-  if(frontendStack) return;
+  if (frontendStack) return;
   const answer = await inquirer.prompt({
     name: "frontend_stack",
     type: "list",
@@ -149,7 +154,7 @@ async function promptFrontendStack() {
 }
 
 async function promptExtraFeatures() {
-  if(extraFeatures) return;
+  if (extraFeatures) return;
   const answer = await inquirer.prompt({
     name: "extra_features",
     type: "checkbox",
@@ -161,7 +166,8 @@ async function promptExtraFeatures() {
 }
 
 async function promptInstallDependencies() {
-  console.clear();
+  console.log();
+  console.log();
   const answer = await inquirer.prompt({
     name: "install",
     type: "confirm",
@@ -170,7 +176,7 @@ async function promptInstallDependencies() {
 
   if (answer.install) {
     console.log(chalk.yellow(`Installing dependencies..`));
-    cmd(`cd ./${projectName} && npm i`, { stdio: "inherit" });
+    execSync(`cd ./${projectName} && npm i`, { stdio: "inherit" });
     console.log(chalk.green(`All Done!`));
     console.log();
     console.log(
@@ -203,7 +209,7 @@ function baseProjectSetup() {
 
   // copy Eslint, Prittier, .gitignore and vite config files
   console.log(chalk.green(`Adding eslint and prettier rules..`));
-  copyFile("/configs/.eslintrc.json", "/.eslintrc.json");
+  copyFile("/configs/.eslintrc.js", "/.eslintrc.js");
   copyFile("/configs/.gitignore", "/.gitignore");
   copyFile("/configs/.prettierrc", "/.prettierrc");
   copyFile("/configs/vite.config.js", `/vite.config.${jsFileExt}`);
@@ -291,7 +297,7 @@ setDirname();
 
 try {
   await showTitle("KOV CREATE APP");
-  
+
   argumentsChecker();
   await promptProjectName();
   await promptFrontendStack();
@@ -300,7 +306,9 @@ try {
   await createScaffold();
 } catch (error) {
   console.log(`Error: ${chalk.red(error.message)}`);
-  cmd(`rm -rf ./${projectName}`);
+  if (projectName && fs.existsSync(`./${projectName}`)) {
+    fs.rmdirSync(`./${projectName}`, { recursive: true, force: true });
+  }
   process.exit(1);
 }
 

@@ -5,6 +5,7 @@ export const DEFAULT_PACKAGES = {
   },
   devDependencies: {
     '@vitejs/plugin-react-swc': '^3.0.0',
+    "vite-plugin-svgr": "^2.4.0",
     eslint: '^8.33.0',
     'eslint-config-airbnb-base': '^15.0.0',
     'eslint-config-prettier': '^8.6.0',
